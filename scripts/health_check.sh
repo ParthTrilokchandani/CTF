@@ -66,7 +66,16 @@ result "Permissions" $?
 result "Backup" $?
 
 # SSH key
-derived_pubkey="$(ssh-keygen -y -f "${BACKUP_KEYS_DIR}/${BACKUP_KEY_FILENAME}" 2>/dev/null)"
+# The backup copy is deliberately world-readable (0644) - that's the
+# intended vulnerability - but ssh-keygen -y refuses to read a private key
+# with permissions that open ("bad permissions"). Check a 0600 scratch copy
+# instead of the live file so the intentional insecurity doesn't break this
+# check.
+key_tmp="$(mktemp)"
+cp "${BACKUP_KEYS_DIR}/${BACKUP_KEY_FILENAME}" "${key_tmp}" 2>/dev/null
+chmod 600 "${key_tmp}"
+derived_pubkey="$(ssh-keygen -y -f "${key_tmp}" 2>/dev/null)"
+rm -f "${key_tmp}"
 [ -f "${BACKUP_KEYS_DIR}/${BACKUP_KEY_FILENAME}" ] && \
     [ -f "${AGENT999_HOME}/.ssh/authorized_keys" ] && \
     [ -n "${derived_pubkey}" ] && \
