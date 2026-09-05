@@ -66,9 +66,11 @@ result "Permissions" $?
 result "Backup" $?
 
 # SSH key
+derived_pubkey="$(ssh-keygen -y -f "${BACKUP_KEYS_DIR}/${BACKUP_KEY_FILENAME}" 2>/dev/null)"
 [ -f "${BACKUP_KEYS_DIR}/${BACKUP_KEY_FILENAME}" ] && \
     [ -f "${AGENT999_HOME}/.ssh/authorized_keys" ] && \
-    grep -qf <(ssh-keygen -y -f "${BACKUP_KEYS_DIR}/${BACKUP_KEY_FILENAME}" 2>/dev/null) "${AGENT999_HOME}/.ssh/authorized_keys" 2>/dev/null
+    [ -n "${derived_pubkey}" ] && \
+    grep -qF "${derived_pubkey}" "${AGENT999_HOME}/.ssh/authorized_keys" 2>/dev/null
 result "SSH key" $?
 
 # .bash_history

@@ -125,6 +125,8 @@ EOF
     a2dissite 000-default.conf >/dev/null 2>&1 || true
     a2ensite ctf.conf >/dev/null
     systemctl enable apache2 >/dev/null 2>&1 || true
+    apache2ctl configtest
+    systemctl reload apache2 >/dev/null 2>&1 || systemctl restart apache2
 
     chown -R www-data:www-data "${CTF_WEB_ROOT}"
     find "${CTF_WEB_ROOT}" -type d -exec chmod 755 {} \;
@@ -247,7 +249,18 @@ EOF
     passwd -l root >/dev/null
 
     sshd -t
-    systemctl restart ssh
+
+    # Ubuntu 22.04+/24.04 ship openssh-server as socket-activated by default:
+    # ssh.socket hardcodes ListenStream=22 and completely ignores sshd_config's
+    # Port directive. Restarting ssh.service alone does nothing about that -
+    # the socket unit must be disabled and the service run standalone instead.
+    if systemctl list-unit-files 2>/dev/null | grep -q '^ssh\.socket'; then
+        systemctl disable --now ssh.socket >/dev/null 2>&1 || true
+    fi
+    systemctl unmask ssh.service >/dev/null 2>&1 || true
+    systemctl enable ssh.service >/dev/null 2>&1 || true
+    systemctl restart ssh.service
+
     ok "SSH listening on port ${SSH_PORT}; root login disabled; Agent999 is key-only"
 }
 
