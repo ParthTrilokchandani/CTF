@@ -1,0 +1,13 @@
+WEBSITE BACKUP - 2021 SNAPSHOT
+===============================
+
+Static export of the old marketing site prior to the 2021 redesign.
+Kept only in case the design team ever wants to reference the old
+layout. No longer referenced by anything in production.
+
+Contents:
+  - index.html.bak
+  - about.html.bak
+  - style.css.bak
+
+Nothing operational is stored in this snapshot.

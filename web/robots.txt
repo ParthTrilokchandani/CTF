@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /hidden/classified-briefing-7f3a2b/
+Disallow: /admin/

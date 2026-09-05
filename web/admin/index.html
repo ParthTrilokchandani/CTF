@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Staff Portal Login</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="brand">Sentinel Meridian Group</div>
+  <nav class="site-nav">
+    <a href="../index.html">Home</a>
+  </nav>
+</header>
+<main>
+  <h1>Staff Portal</h1>
+  <p class="tagline">Authorized personnel only.</p>
+
+  <form class="contact-form" id="loginForm">
+    <input type="text" name="username" placeholder="Username" autocomplete="off" required>
+    <input type="password" name="password" placeholder="Password" autocomplete="off" required>
+    <button type="submit">Sign In</button>
+  </form>
+  <p id="loginResult" style="color:#7a1f2b; font-weight:bold; display:none;">
+    Invalid username or password.
+  </p>
+</main>
+<footer>
+  &copy; Sentinel Meridian Group. All rights reserved.
+</footer>
+<script>
+  // Static demo form only - there is no backend authentication endpoint
+  // and no bypass. Every submission is rejected client-side.
+  document.getElementById('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    document.getElementById('loginResult').style.display = 'block';
+  });
+</script>
+</body>
+</html>

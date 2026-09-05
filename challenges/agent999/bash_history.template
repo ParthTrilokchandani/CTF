@@ -1,0 +1,15 @@
+whoami
+id
+cd /var/backups/legacy-ops
+ls -la
+cat ops-notes.txt
+uptime
+df -h
+sudo -l
+cd ~
+ls -la
+export LEGACY_TOKEN='__FLAG4_B64__'
+echo $LEGACY_TOKEN | base64 -d
+unset LEGACY_TOKEN
+history -c
+exit

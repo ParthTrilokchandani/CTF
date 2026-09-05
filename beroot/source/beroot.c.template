@@ -1,0 +1,44 @@
+/*
+ * .beroot - legacy operations access tool
+ *
+ * Built by scripts/install_ctf.sh, which substitutes __BEROOT_PASSWORD__
+ * below with a freshly generated random password before compiling. The
+ * source is intentionally simple: a single strcmp() gate. It is meant to
+ * be recovered by a player via `strings` or Ghidra decompilation, then
+ * supplied on stdin after invoking the binary through the one sudo rule
+ * Agent999 is granted.
+ *
+ * Because it is only ever reachable via:
+ *   sudo /home/Agent999/.system-audit/.beroot
+ * the process already runs with euid 0 by the time main() executes, so a
+ * successful password check simply execs a root shell.
+ */
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+#define MAX_INPUT_LEN 128
+
+int main(void) {
+    char input[MAX_INPUT_LEN];
+    const char *expected_password = "__BEROOT_PASSWORD__";
+
+    printf("Password: ");
+    fflush(stdout);
+
+    if (fgets(input, sizeof(input), stdin) == NULL) {
+        return 1;
+    }
+    input[strcspn(input, "\n")] = '\0';
+
+    if (strcmp(input, expected_password) == 0) {
+        setuid(0);
+        setgid(0);
+        execl("/bin/bash", "bash", (char *)NULL);
+        perror("execl");
+        return 1;
+    }
+
+    printf("Access denied.\n");
+    return 1;
+}
