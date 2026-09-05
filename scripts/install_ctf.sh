@@ -213,7 +213,10 @@ step_populate_agent999_home() {
     log "Populating ${AGENT999_HOME}"
 
     mkdir -p "${AGENT999_HOME}/.ssh"
-    cat "${BACKUP_KEYS_DIR}/${BACKUP_KEY_FILENAME}.pub" >> "${AGENT999_HOME}/.ssh/authorized_keys"
+    # Overwrite rather than append, so re-running install_ctf.sh directly
+    # (without going through uninstall/reset first) can't leave a stale key
+    # from a previous run sitting alongside the current one.
+    cat "${BACKUP_KEYS_DIR}/${BACKUP_KEY_FILENAME}.pub" > "${AGENT999_HOME}/.ssh/authorized_keys"
     chmod 700 "${AGENT999_HOME}/.ssh"
     chmod 600 "${AGENT999_HOME}/.ssh/authorized_keys"
 
@@ -276,6 +279,10 @@ step_deploy_backup_and_key() {
         "${CTF_SOURCE_DIR}/challenges/backup/ops-notes.txt.template" \
         > "${BACKUP_DIR}/ops-notes.txt"
 
+    # Remove any key from a previous run first so ssh-keygen never hits its
+    # interactive "overwrite?" prompt (which would hang / silently no-op
+    # under set -e non-interactively) when install_ctf.sh is re-run directly.
+    rm -f "${BACKUP_KEYS_DIR}/${BACKUP_KEY_FILENAME}" "${BACKUP_KEYS_DIR}/${BACKUP_KEY_FILENAME}.pub"
     ssh-keygen -t ed25519 -f "${BACKUP_KEYS_DIR}/${BACKUP_KEY_FILENAME}" -N "" -C "${AGENT999_USER}-legacy-access" -q
 
     chown -R root:root "${BACKUP_DIR}"
