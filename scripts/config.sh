@@ -60,7 +60,11 @@ ROBOTS_HIDDEN_PATH="classified-briefing-7f3a2b"   # web/hidden/<this>/index.html
 # ---- Steganography -----------------------------------------------------------
 STEGHIDE_IMAGE_NAME="team-photo.jpg"
 STEGHIDE_IMAGE_PATH="${CTF_WEB_ROOT}/assets/${STEGHIDE_IMAGE_NAME}"
-STEGHIDE_PAYLOAD_NAME="message.txt"
+# Named after the account it grants access to (not "message.txt") - steghide
+# restores this exact filename on a plain `steghide extract -sf <image>`
+# (no -xf override), so the filename itself is how a player learns the SSH
+# username; the file's content only ever holds the encoded password.
+STEGHIDE_PAYLOAD_NAME="${AGENT99_USER}.txt"
 
 # IMPORTANT: organizer must change this before install. It must be a real
 # entry copied from the organizer's own rockyou.txt (a later/less common
@@ -85,4 +89,11 @@ SUID_DECOY_SRC="${CTF_SOURCE_DIR}/challenges/privilege-escalation/sysdiag.c"
 FLAG_PREFIX="CTF"
 
 # ---- Firewall ------------------------------------------------------------------
-FIREWALL_ALLOWED_TCP_PORTS=("${SSH_PORT}" "80")
+# The Flag 5 stage intentionally requires Agent999 to stand up a temporary
+# `python3 -m http.server <port>` to move .beroot off the target - ufw must
+# allow inbound connections to that port, or the intended technique is
+# unreachable from outside the box (loopback-only testing on the VM itself
+# won't catch this, since ufw doesn't filter lo). Players are expected to
+# use this exact port for that server.
+TRANSFER_PORT="1337"
+FIREWALL_ALLOWED_TCP_PORTS=("${SSH_PORT}" "80" "${TRANSFER_PORT}")

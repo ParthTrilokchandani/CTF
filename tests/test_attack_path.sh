@@ -57,6 +57,13 @@ step "Stego image downloaded" $?
 steghide extract -sf "${WORK}/${STEGHIDE_IMAGE_NAME}" -p "${STEGHIDE_PASSPHRASE}" -xf "${WORK}/${STEGHIDE_PAYLOAD_NAME}" -f -q
 step "steghide extraction with configured passphrase" $?
 
+# In real play the player runs extract without -xf, so steghide restores the
+# original embedded filename (${AGENT99_USER}.txt) - that filename is how
+# the username is discovered. This test pins -xf for a predictable path, so
+# it separately confirms the configured payload name matches the username.
+[ "${STEGHIDE_PAYLOAD_NAME}" = "${AGENT99_USER}.txt" ]
+step "Extracted filename reveals the SSH username" $?
+
 agent99_pass_decoded="$(grep -oP '^\S+={0,2}$' "${WORK}/${STEGHIDE_PAYLOAD_NAME}" | tail -n1 | base64 -d 2>/dev/null)"
 [ "${agent99_pass_decoded}" = "${AGENT99_PASSWORD}" ]
 step "Agent99 SSH password recovered from extracted payload" $?
@@ -106,11 +113,11 @@ step "sudo -l reveals the allowed .beroot command" $?
 
 # Simulate the Python HTTP server transfer technique end to end.
 ssh "${SSH_OPTS[@]}" -i "${WORK}/id_rsa" "${AGENT999_USER}@127.0.0.1" \
-    "cd ${AGENT999_HIDDEN_DIR} && nohup python3 -m http.server 8901 >/tmp/.httpd.log 2>&1 & sleep 1" 2>/dev/null
-curl -s --max-time 5 -o "${WORK}/.beroot" "http://127.0.0.1:8901/.beroot"
+    "cd ${AGENT999_HIDDEN_DIR} && nohup python3 -m http.server ${TRANSFER_PORT} >/tmp/.httpd.log 2>&1 & sleep 1" 2>/dev/null
+curl -s --max-time 5 -o "${WORK}/.beroot" "http://127.0.0.1:${TRANSFER_PORT}/.beroot"
 step ".beroot transferred via Python HTTP server" $?
 ssh "${SSH_OPTS[@]}" -i "${WORK}/id_rsa" "${AGENT999_USER}@127.0.0.1" \
-    "pkill -f 'http.server 8901'" 2>/dev/null || true
+    "pkill -f 'http.server ${TRANSFER_PORT}'" 2>/dev/null || true
 
 strings "${WORK}/.beroot" 2>/dev/null | grep -qF "${BEROOT_PASSWORD}"
 step ".beroot password recoverable via strings/Ghidra-equivalent" $?

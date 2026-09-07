@@ -152,7 +152,7 @@ step_deploy_stego() {
         "${work}/${STEGHIDE_IMAGE_NAME}"
 
     sed "s|__AGENT99_PASS_B64__|$(b64 "${AGENT99_PASSWORD}")|" \
-        "${CTF_SOURCE_DIR}/challenges/stego/message.txt.template" \
+        "${CTF_SOURCE_DIR}/challenges/stego/Agent99.txt.template" \
         > "${work}/${STEGHIDE_PAYLOAD_NAME}"
 
     steghide embed -cf "${work}/${STEGHIDE_IMAGE_NAME}" \
