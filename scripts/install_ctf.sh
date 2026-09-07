@@ -312,7 +312,16 @@ step_build_beroot() {
     sed "s|__BEROOT_PASSWORD__|${BEROOT_PASSWORD}|" \
         "${BEROOT_SRC_TEMPLATE}" > "${BEROOT_BUILD_DIR}/beroot.c"
 
-    gcc -O2 -o "${BEROOT_BUILD_DIR}/.beroot" "${BEROOT_BUILD_DIR}/beroot.c"
+    # -O0 -fno-builtin: at -O2, GCC folds a strcmp() against a short fixed
+    # literal into inline integer/register comparisons (no strcmp call, no
+    # literal string left in memory) - Ghidra then shows CONCAT/hex-constant
+    # comparisons instead of a plain strcmp(x, "password") call, forcing
+    # players to hand-reconstruct the password from packed bytes. That's
+    # harder than intended: the password should be recoverable through
+    # basic decompilation. -fno-builtin is a belt-and-braces guard against
+    # the same substitution kicking in if the optimization level ever
+    # changes later.
+    gcc -O0 -fno-builtin -o "${BEROOT_BUILD_DIR}/.beroot" "${BEROOT_BUILD_DIR}/beroot.c"
 
     mkdir -p "${AGENT999_HIDDEN_DIR}"
     mv "${BEROOT_BUILD_DIR}/.beroot" "${BEROOT_BIN}"
