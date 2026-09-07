@@ -141,11 +141,18 @@ installs, only the flags/passwords do.
   (root) NOPASSWD: /home/Agent999/.system-audit/.beroot ""
   ```
   This is also how the hidden `.system-audit/` directory is discovered —
-  it was never listed by a normal `ls` in the home directory.
+  it was never listed by a normal `ls` in the home directory. Inside it,
+  alongside `.beroot`, sits `system-audit-note.txt` - in-world flavor text
+  that states the transfer port (`1337`) outright. This is deliberate:
+  `ufw` only allows that one arbitrary port through for the transfer step,
+  and a player has no way to derive or reasonably guess it (a full
+  `nmap -p-` scan technically reveals it as the one `closed` port among a
+  sea of `filtered` ones, but that's slow and easy to miss on a live event
+  - see [TROUBLESHOOTING.md](TROUBLESHOOTING.md)). The note hands over the
+  port number directly; it still only nudges at *how* to use it, leaving
+  the actual Python HTTP server technique for the player to land on.
 - **Transfer for analysis** (the intended technique is a Python HTTP
-  server, never stated outright to players). Port `1337` is the only
-  transfer port `ufw` allows inbound - see
-  [NETWORK_GUIDE.md](NETWORK_GUIDE.md):
+  server, never stated outright to players):
   ```bash
   # on the target, as Agent999:
   cd ~/.system-audit && python3 -m http.server 1337

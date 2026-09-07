@@ -65,5 +65,8 @@ After installation, `ufw` allows these inbound TCP ports:
   when tested from the VM itself (`ufw` doesn't filter loopback traffic) and
   silently fails for a real remote player — see
   [TROUBLESHOOTING.md](TROUBLESHOOTING.md#cant-download-beroot-from-outside-the-vm).
+  The port number itself is handed to the player in-world (a note found
+  alongside `.beroot`), not left for them to discover purely via network
+  scanning — see [ORGANIZER_SOLUTIONS.md](ORGANIZER_SOLUTIONS.md).
 
 Everything else inbound is denied by default.

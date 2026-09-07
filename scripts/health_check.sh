@@ -86,8 +86,8 @@ result "SSH key" $?
 [ -s "${AGENT999_HOME}/.bash_history" ]
 result ".bash_history" $?
 
-# .beroot
-[ -x "${BEROOT_BIN}" ]
+# .beroot (and the companion note that reveals the transfer port in-world)
+[ -x "${BEROOT_BIN}" ] && [ -f "$(dirname "${BEROOT_BIN}")/system-audit-note.txt" ]
 result ".beroot" $?
 
 # Sudo rule

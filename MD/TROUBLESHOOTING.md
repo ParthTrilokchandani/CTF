@@ -31,9 +31,17 @@ VM without a full reinstall:
 sudo ufw allow 1337/tcp
 ```
 
-Players discover the correct port themselves (e.g. by trying the obvious
-default and finding it blocked, then scanning) - no riddle spells out
-`1337` directly.
+A full `nmap -p- --reason <ip>` scan will technically reveal `1337` as the
+one `closed` port sitting among thousands of `filtered` ones (since `ufw
+allow` on a port nothing is listening on yet still gets a kernel-level TCP
+RST, distinct from the silent drop everything else gets) - but that's slow
+and easy to miss during a live event, and isn't something a player can be
+expected to find on demand. So the port number is also handed to the
+player directly, in-world: `system-audit-note.txt` sits right next to
+`.beroot` in `.system-audit/`, discovered by the same `ls -la` that finds
+the binary itself, and states the port outright. It still leaves the
+actual technique (a disposable Python HTTP server) for the player to land
+on themselves.
 
 ## `health_check.sh` reports `robots.txt FAIL` but `Web server` passes
 

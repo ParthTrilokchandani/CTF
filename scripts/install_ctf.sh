@@ -316,9 +316,18 @@ step_build_beroot() {
 
     mkdir -p "${AGENT999_HIDDEN_DIR}"
     mv "${BEROOT_BUILD_DIR}/.beroot" "${BEROOT_BIN}"
-    chown "${AGENT999_USER}:${AGENT999_USER}" "${BEROOT_BIN}" "${AGENT999_HIDDEN_DIR}"
+
+    # Sits alongside .beroot so the transfer port is discovered through the
+    # same enumeration that finds the binary itself, not through a slow
+    # full-range network scan (ufw allowing an otherwise-arbitrary port
+    # through isn't something a player can be expected to guess or derive).
+    cp "${CTF_SOURCE_DIR}/challenges/agent999/system-audit-note.txt" \
+        "${AGENT999_HIDDEN_DIR}/system-audit-note.txt"
+
+    chown -R "${AGENT999_USER}:${AGENT999_USER}" "${AGENT999_HIDDEN_DIR}"
     chmod 700 "${AGENT999_HIDDEN_DIR}"
     chmod 700 "${BEROOT_BIN}"
+    chmod 644 "${AGENT999_HIDDEN_DIR}/system-audit-note.txt"
 
     rm -rf "${BEROOT_BUILD_DIR}"
     ok ".beroot compiled and installed at ${BEROOT_BIN}; source removed from disk"
