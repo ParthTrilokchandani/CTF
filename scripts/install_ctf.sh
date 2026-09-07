@@ -168,6 +168,29 @@ step_deploy_stego() {
 }
 
 # ---------------------------------------------------------------------------
+# Decorative images (non-stego) - so the real stego image isn't the only
+# image on the site, and doesn't stand out just by being present.
+# ---------------------------------------------------------------------------
+step_deploy_decorative_images() {
+    log "Generating decorative placeholder images"
+
+    convert -size 1200x700 gradient:'#3a3f4a'-'#1e3a5f' \
+        -gravity center -fill white -pointsize 38 \
+        -annotate +0+0 "SENTINEL MERIDIAN GROUP - HEAD OFFICE" \
+        "${CTF_WEB_ROOT}/assets/office-exterior.jpg"
+
+    convert -size 1200x700 gradient:'#4a4238'-'#5f4a1e' \
+        -gravity center -fill white -pointsize 38 \
+        -annotate +0+0 "SENTINEL MERIDIAN GROUP - BRIEFING ROOM" \
+        "${CTF_WEB_ROOT}/assets/briefing-room.jpg"
+
+    chown www-data:www-data "${CTF_WEB_ROOT}/assets/office-exterior.jpg" "${CTF_WEB_ROOT}/assets/briefing-room.jpg"
+    chmod 644 "${CTF_WEB_ROOT}/assets/office-exterior.jpg" "${CTF_WEB_ROOT}/assets/briefing-room.jpg"
+
+    ok "Decorative images deployed"
+}
+
+# ---------------------------------------------------------------------------
 # 8/9. Create Agent99 and Agent999
 # ---------------------------------------------------------------------------
 step_create_users() {
@@ -467,6 +490,7 @@ main() {
     step_generate_secrets
     step_deploy_website
     step_deploy_stego
+    step_deploy_decorative_images
     step_create_users
     step_populate_agent99_home
     step_deploy_backup_and_key

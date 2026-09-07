@@ -4,6 +4,48 @@ Organizer-only. Everything here was hit and fixed during development of
 this project — start with `sudo bash scripts/health_check.sh` to see which
 of the 14 checks is failing, then find it below.
 
+## Ghidra shows `CONCAT`/hex-constant comparisons instead of `strcmp(x, "password")`
+
+A player (or you, testing) decompiles `.beroot` in Ghidra and `main()`
+doesn't show a plain `strcmp()` call against a readable string - instead
+it's a chain of comparisons like `local_98 == 0x38486c4e54505472` and
+`CONCAT35(uStack_8b,local_90) == ...`.
+
+**Cause**: at `-O2`, GCC folds a `strcmp()` against a short, fixed-length
+string literal into inline integer/register comparisons instead of
+emitting a call to `strcmp` with the literal left intact in `.rodata`. The
+password technically still exists in the compiled binary, just scattered
+across immediate operands in the instruction encoding rather than as one
+contiguous readable string - `strings .beroot` won't reliably find it
+either. This makes the reverse-engineering step meaningfully harder than
+intended (the design goal is a password recoverable through *basic*
+decompilation, not manual little-endian byte reconstruction).
+
+**Fix**: `install_ctf.sh` now compiles `.beroot` with `gcc -O0 -fno-builtin`
+instead of `-O2`. At `-O0`, GCC leaves a plain `strcmp(input, "password")`
+call intact with the literal readable directly in Ghidra's decompile view
+(and via plain `strings .beroot`). `-fno-builtin` is a belt-and-braces
+guard in case the optimization level changes again later.
+
+If you're stuck with an already-built binary from before this fix and
+don't want to trigger a full reinstall (which regenerates every flag and
+credential), just recompile `.beroot` in place using the existing password
+from the organizer manifest:
+
+```bash
+sudo bash -c '
+source /opt/ctf/src/scripts/config.sh
+source /opt/ctf/.organizer/secrets.env
+mkdir -p /tmp/beroot-rebuild
+sed "s|__BEROOT_PASSWORD__|${BEROOT_PASSWORD}|" "${BEROOT_SRC_TEMPLATE}" > /tmp/beroot-rebuild/beroot.c
+gcc -O0 -fno-builtin -o /tmp/beroot-rebuild/.beroot /tmp/beroot-rebuild/beroot.c
+mv /tmp/beroot-rebuild/.beroot "${BEROOT_BIN}"
+chown "${AGENT999_USER}:${AGENT999_USER}" "${BEROOT_BIN}"
+chmod 700 "${BEROOT_BIN}"
+rm -rf /tmp/beroot-rebuild
+'
+```
+
 ## Can't download `.beroot` from outside the VM
 
 A player runs `python3 -m http.server <port>` as Agent999 (or any user) and

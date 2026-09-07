@@ -161,7 +161,12 @@ installs, only the flags/passwords do.
   ```
 - **Reverse engineering**: Open `.beroot` in Ghidra, decompile `main`. It's
   a single `strcmp()` against a hardcoded string — recoverable via Ghidra's
-  decompiler or just `strings .beroot | less`.
+  decompiler or just `strings .beroot | less`. Compiled with `-O0
+  -fno-builtin` specifically so this stays a plain, directly-readable
+  `strcmp()` call rather than GCC folding it into inline integer
+  comparisons (which happens at `-O2` and makes this step needlessly
+  harder — see [TROUBLESHOOTING.md](TROUBLESHOOTING.md) if you ever see
+  `CONCAT`/hex-constant comparisons instead).
 - **Root transition**:
   ```bash
   sudo /home/Agent999/.system-audit/.beroot
