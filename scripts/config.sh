@@ -70,7 +70,7 @@ STEGHIDE_PAYLOAD_NAME="${AGENT99_USER}.txt"
 # entry copied from the organizer's own rockyou.txt (a later/less common
 # entry, timed for a meaningful-but-not-absurd brute-force). install_ctf.sh
 # refuses to run while this is left at the placeholder value.
-STEGHIDE_PASSPHRASE="__CHANGE_ME_PICK_FROM_ROCKYOU__"
+STEGHIDE_PASSPHRASE="jessica123"
 
 # Optional: local path to the organizer's own rockyou.txt, used only to
 # sanity-check that STEGHIDE_PASSPHRASE actually appears in it. Never
