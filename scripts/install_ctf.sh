@@ -435,6 +435,23 @@ step_configure_firewall() {
 }
 
 # ---------------------------------------------------------------------------
+# Port watchdog - reclaims TRANSFER_PORT on a shared/multi-team instance
+# ---------------------------------------------------------------------------
+step_configure_port_watchdog() {
+    log "Configuring transfer-port watchdog"
+
+    sed "s|__SCRIPTS_DIR__|${CTF_SCRIPTS_DIR}|" \
+        "${CTF_SOURCE_DIR}/scripts/ctf-port-watchdog.service.template" \
+        > /etc/systemd/system/ctf-port-watchdog.service
+
+    systemctl daemon-reload
+    systemctl enable ctf-port-watchdog.service >/dev/null 2>&1
+    systemctl restart ctf-port-watchdog.service
+
+    ok "Port ${TRANSFER_PORT} will be reclaimed after ${TRANSFER_PORT_MAX_AGE_SECONDS}s if left occupied"
+}
+
+# ---------------------------------------------------------------------------
 # 20/21. Deploy scripts for later organizer use, generate flags/secrets
 # ---------------------------------------------------------------------------
 step_generate_secrets() {
@@ -501,6 +518,7 @@ main() {
     step_deploy_remaining_flags
     step_deploy_rabbit_hole_3
     step_configure_firewall
+    step_configure_port_watchdog
     step_deploy_scripts
     step_validate
 

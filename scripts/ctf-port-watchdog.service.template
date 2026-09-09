@@ -1,0 +1,13 @@
+[Unit]
+Description=CTF transfer-port watchdog (frees the Flag 5 transfer port on a shared instance)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env bash __SCRIPTS_DIR__/port-watchdog.sh
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target

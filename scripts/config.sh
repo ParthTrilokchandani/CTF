@@ -97,3 +97,11 @@ FLAG_PREFIX="CTF"
 # use this exact port for that server.
 TRANSFER_PORT="1337"
 FIREWALL_ALLOWED_TCP_PORTS=("${SSH_PORT}" "80" "${TRANSFER_PORT}")
+
+# On a shared/multi-team event, only one player at a time can bind
+# TRANSFER_PORT. A background watchdog (ctf-port-watchdog.service) kills
+# whatever is listening on it once it's been up this long, so a forgotten
+# or abandoned server never locks other teams out for the rest of the
+# event. Checked every TRANSFER_PORT_CHECK_INTERVAL seconds.
+TRANSFER_PORT_MAX_AGE_SECONDS="50"
+TRANSFER_PORT_CHECK_INTERVAL="5"

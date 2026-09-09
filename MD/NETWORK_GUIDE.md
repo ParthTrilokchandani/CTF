@@ -70,3 +70,32 @@ After installation, `ufw` allows these inbound TCP ports:
   scanning — see [ORGANIZER_SOLUTIONS.md](ORGANIZER_SOLUTIONS.md).
 
 Everything else inbound is denied by default.
+
+## Transfer-port watchdog (multi-team events)
+
+Only one process can bind `TRANSFER_PORT` (1337) at a time. On a shared
+instance with multiple teams, one team's forgotten `python3 -m http.server`
+would otherwise lock every other team out of the Flag 5 transfer step for
+the rest of the event.
+
+`ctf-port-watchdog.service` runs continuously as root and reclaims the
+port automatically: every `TRANSFER_PORT_CHECK_INTERVAL` seconds (default
+5) it checks whether anything is listening on `TRANSFER_PORT`, and kills
+it once it's been up for `TRANSFER_PORT_MAX_AGE_SECONDS` (default 50). A
+normal player only needs the port open for as long as a single download
+takes, so this doesn't interrupt legitimate use - it just guarantees the
+port is free again within about a minute regardless of what any one team
+does with it. Both values live in `scripts/config.sh`.
+
+```bash
+# organizer visibility into the watchdog
+sudo systemctl status ctf-port-watchdog.service
+sudo journalctl -u ctf-port-watchdog -f
+```
+
+This does **not** make the environment fully multi-team on its own -
+`Agent99` and `Agent999` are still single shared accounts with one set of
+credentials, so simultaneous teams would see each other's shell history,
+`.bash_history` edits, and home-directory state on those accounts. The
+watchdog only solves the specific `TRANSFER_PORT` contention problem; true
+per-team isolation would require a separate VM (or account set) per team.

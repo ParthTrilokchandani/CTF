@@ -56,4 +56,9 @@ rm -f /root/.sysconfig_cache
 log "Resetting firewall"
 ufw --force reset >/dev/null 2>&1 || true
 
+log "Removing transfer-port watchdog"
+systemctl disable --now ctf-port-watchdog.service >/dev/null 2>&1 || true
+rm -f /etc/systemd/system/ctf-port-watchdog.service
+systemctl daemon-reload >/dev/null 2>&1 || true
+
 log "Uninstall complete (${CTF_ROOT}/src and ${CTF_ORGANIZER_DIR} were left in place)"
